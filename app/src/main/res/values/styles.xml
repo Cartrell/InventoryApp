@@ -8,4 +8,94 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- =================================================================== -->
+    <!-- styles for product details uis -->
+    <!-- =================================================================== -->
+
+    <!-- =================================================================== -->
+    <!-- container for an entire row of UI on the product details view (all UI for name, all UI for price, etc) -->
+    <style name="EditorMainLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <!-- =================================================================== -->
+    <!-- container for an entire row of UI on the product details view (all UI for name, all UI for price, etc) -->
+    <style name="EditorRowLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- =================================================================== -->
+    <style name="EditorValueBaseLayout">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">20</item>
+    </style>
+
+    <!-- linear horizontal layout that contains an editor text for modifying a value -->
+    <style name="EditorValueHzLayout" parent="EditorValueBaseLayout">
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!--
+        linear vertical layout that contains an editor text for modifying a value. this is used
+        if ny buttons are underneaththe editing ui
+    -->
+    <style name="EditorValueVtLayout" parent="EditorValueBaseLayout">
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- =================================================================== -->
+    <!-- the static label that appears to the left of editor text -->
+    <style name="EditorLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">10</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- =================================================================== -->
+    <!-- editor text -->
+    <style name="EditorBaseValue">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="EditorTextValue" parent="EditorBaseValue">
+        <item name="android:inputType">text</item>
+    </style>
+
+    <style name="EditorTextNumber" parent="EditorBaseValue">
+        <item name="android:inputType">number</item>
+    </style>
+
+    <style name="EditorTextPhone" parent="EditorBaseValue">
+        <item name="android:inputType">phone</item>
+    </style>
+
+    <!-- =================================================================== -->
+    <!-- buttons that accompany the editor text -->
+    <style name="EditorButtonLayout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="EditorButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="EditorCheckBox" parent="EditorButton">
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginTop">8dp</item>
+    </style>
 </resources>

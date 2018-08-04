@@ -1,22 +1,129 @@
 package com.gameplaycoder.cartrell.inventoryapp;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.gameplaycoder.cartrell.inventoryapp.data.BookContract.BookEntry;
-import com.gameplaycoder.cartrell.inventoryapp.data.BookEntries;
-import com.gameplaycoder.cartrell.inventoryapp.data.BooksDbHelper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+IBookCursorAdapterCallbacks {
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // static / const
+  ////////////////////////////////////////////////////////////////////////////////
+  private static final int LOADER_ID = 1;
+  private static final String LOG_NAME = MainActivity.class.getName();
 
   ////////////////////////////////////////////////////////////////////////////////
   // members
   ////////////////////////////////////////////////////////////////////////////////
-  private BooksDbHelper mDbHelper;
+  private BookCursorAdapter mAdapter;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // public
+  ////////////////////////////////////////////////////////////////////////////////
+
+  //------------------------------------------------------------------------------
+  // bookCursorAdapterOnSale
+  //------------------------------------------------------------------------------
+  @Override
+  public void bookCursorAdapterOnSale(BookCursorAdapter adapter, int position) {
+    Cursor cursor = adapter.getCursor();
+
+    //check for valid cursor and move to correct row in the table
+    if (cursor == null || cursor.getCount() < 1 || !cursor.moveToFirst() || !cursor.move(position)) {
+      Log.i(LOG_NAME, "bookCursorAdapterOnSale. Invalid cursor");
+      return;
+    }
+
+    //get the current quantity
+    int quantity = cursor.getInt(cursor.getColumnIndex(BookEntry.COLUMN_QUANTITY));
+    if (quantity <= 0) {
+      Log.i(LOG_NAME, "bookCursorAdapterOnSale. Invalid quantity");
+      return;
+    }
+
+    //add new quantity to content values
+    quantity--;
+    ContentValues values = new ContentValues();
+    values.put(BookEntry.COLUMN_QUANTITY, quantity);
+
+    //update the table row
+    int rowId = cursor.getInt(cursor.getColumnIndex(BookEntry._ID));
+    Uri uri = Uri.withAppendedPath(BookEntry.CONTENT_URI, String.valueOf(rowId));
+    int rowsAffected = getContentResolver().update(uri, values, null, null);
+    if (rowsAffected > 0) {
+      Toast.makeText(this, R.string.sold, Toast.LENGTH_SHORT).show();
+    } else {
+      Toast.makeText(this, R.string.error_updating_book, Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  //------------------------------------------------------------------------------
+  // onCreateLoader
+  //------------------------------------------------------------------------------
+  @NonNull
+  @Override
+  public Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
+    return(new CursorLoader(this, BookEntry.CONTENT_URI, null, null,
+      null, null));
+  }
+
+  //------------------------------------------------------------------------------
+  // onLoaderReset
+  //------------------------------------------------------------------------------
+  @Override
+  public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+    mAdapter.changeCursor(null);
+  }
+
+  //------------------------------------------------------------------------------
+  // onLoadFinished
+  //------------------------------------------------------------------------------
+  @Override
+  public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
+    mAdapter.changeCursor(data);
+  }
+
+  //------------------------------------------------------------------------------
+  // onCreateOptionsMenu
+  //------------------------------------------------------------------------------
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_main, menu);
+    return(true);
+  }
+
+  //------------------------------------------------------------------------------
+  // onOptionsItemSelected
+  //------------------------------------------------------------------------------
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    // User clicked on a menu option in the app bar overflow menu
+    switch (item.getItemId()) {
+      case R.id.menu_item_add:
+        handleMenuItemAdd();
+        return(true);
+    }
+
+    return(super.onOptionsItemSelected(item));
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // protected
@@ -29,10 +136,10 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    initListView();
 
-    mDbHelper = new BooksDbHelper(this);
-    insertData();
-    readData();
+    //async load the data from the db
+    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -40,95 +147,44 @@ public class MainActivity extends AppCompatActivity {
   ////////////////////////////////////////////////////////////////////////////////
 
   //------------------------------------------------------------------------------
-  // insertData
+  // handleMenuItemAdd
   //------------------------------------------------------------------------------
-  private void insertData() {
-    SQLiteDatabase db = mDbHelper.getWritableDatabase();
-    insertEntry(db, BookEntries.Captivate());
-    insertEntry(db, BookEntries.CompassionateSamurai());
-    insertEntry(db, BookEntries.ConfidentYou());
-    insertEntry(db, BookEntries.Hilda());
-    insertEntry(db, BookEntries.HowToWinFriends());
-    insertEntry(db, BookEntries.Quiet());
+  private void handleMenuItemAdd() {
+    //go to "create mode" to create a new entry for the db
+    Intent intent = new Intent(this, ProductDetailsActivity.class);
+    startActivity(intent);
   }
 
   //------------------------------------------------------------------------------
-  // insertEntry
+  // initListView
   //------------------------------------------------------------------------------
-  private void insertEntry(SQLiteDatabase db, ContentValues values) {
-    final String TABLE_NAME = BookEntry.TABLE_NAME;
-    long id = db.insert(TABLE_NAME, null, values);
+  private void initListView() {
+    ListView booksListView = findViewById(R.id.books_list);
 
-    TextView textView = findViewById(R.id.txt_log);
-    if (id > -1) {
-      textView.append("successfully inserted data at id " + String.valueOf(id) + "\n");
-    } else {
-      textView.append("error inserting data\n");
-    }
-  }
+    //assign the empty view to the list view
+    View emptyView = findViewById(R.id.empty_view);
+    booksListView.setEmptyView(emptyView);
 
-  //------------------------------------------------------------------------------
-  // readData
-  //------------------------------------------------------------------------------
-  private void readData() {
-    // Create and/or open a database to read from it
-    SQLiteDatabase db = mDbHelper.getReadableDatabase();
+    //set up the cursor adapter to be used by the list view
+    mAdapter = new BookCursorAdapter(this, null, this);
+    booksListView.setAdapter(mAdapter);
 
-    String[] columns = new String[]{
-      BookEntry.COLUMN_NAME,
-      BookEntry.COLUMN_PRICE,
-      BookEntry.COLUMN_QUANTITY,
-      BookEntry.COLUMN_SUPPLIER,
-      BookEntry.COLUMN_SUPPLIER_PHONE,
-      BookEntry.COLUMN_IS_AUDIOBOOK_AVAILABLE
-    };
+    //set up the list view items, so that when one is clicked, it goes to "edit mode" for
+    // the data of that item
+    booksListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-    Cursor cursor = db.query(BookEntry.TABLE_NAME, null, null, null,
-      null, null, null);
+      //----------------------------------------------------------------------------
+      // onItemClick
+      //----------------------------------------------------------------------------
+      @Override
+      public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        String idString = String.valueOf(id);
+        Uri uri = Uri.withAppendedPath(BookEntry.CONTENT_URI, idString);
 
-    TextView textView = findViewById(R.id.txt_log);
-
-    try {
-      textView.append("Number of books in the " + BookEntry.TABLE_NAME + "table: " + cursor.getCount());
-      textView.append("\n" +
-        BookEntry._ID + " - " +
-        BookEntry.COLUMN_NAME + " - " +
-        BookEntry.COLUMN_PRICE + " - " +
-        BookEntry.COLUMN_QUANTITY + " - " +
-        BookEntry.COLUMN_SUPPLIER + " - " +
-        BookEntry.COLUMN_SUPPLIER_PHONE + " - " +
-        BookEntry.COLUMN_IS_AUDIOBOOK_AVAILABLE);
-
-      // Figure out the index of each column
-      int idColumnIndex = cursor.getColumnIndex(BookEntry._ID);
-      int nameColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_NAME);
-      int priceColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_PRICE);
-      int quantityColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_QUANTITY);
-      int supplierColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER);
-      int supplierPhoneColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_SUPPLIER_PHONE);
-      int audiobookColumnIndex = cursor.getColumnIndex(BookEntry.COLUMN_IS_AUDIOBOOK_AVAILABLE);
-
-      // Iterate through all the returned rows in the cursor
-      while (cursor.moveToNext()) {
-        int currentID = cursor.getInt(idColumnIndex);
-        String currentName = cursor.getString(nameColumnIndex);
-        int currentPrice = cursor.getInt(priceColumnIndex);
-        int currentQuantity = cursor.getInt(quantityColumnIndex);
-        String currentSupplier = cursor.getString(supplierColumnIndex);
-        String currentSupplierPhone = cursor.getString(supplierPhoneColumnIndex);
-        int currentAudiobook = cursor.getInt(audiobookColumnIndex);
-
-        textView.append("\n" +
-          currentID + " - " +
-          currentName + " - " +
-          currentPrice + " - " +
-          currentQuantity + " - " +
-          currentSupplier + " - " +
-          currentSupplierPhone + " - " +
-          (currentAudiobook == 1 ? "yes" : "no"));
+        Intent intent = new Intent(MainActivity.this, ProductDetailsActivity.class);
+        intent.setData(uri);
+        startActivity(intent);
       }
-    } finally {
-      cursor.close();
-    }
+    });
   }
 }

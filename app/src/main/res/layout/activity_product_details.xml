@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProductDetailsActivity">
+
+    <!-- //////////////////////////////////// -->
+    <!-- single scroll view container which holds all ui -->
+    <!-- //////////////////////////////////// -->
+    <LinearLayout
+        style="@style/EditorMainLayout" >
+
+        <!-- //////////////////////////////////// -->
+        <!-- name -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_name" />
+
+            <LinearLayout
+                style="@style/EditorValueHzLayout">
+
+                <EditText
+                    android:id="@+id/edit_book_name"
+                    style="@style/EditorTextValue"
+                    android:hint="@string/required_field" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- //////////////////////////////////// -->
+        <!-- price -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_price" />
+
+            <LinearLayout
+                style="@style/EditorValueHzLayout">
+
+                <EditText
+                    android:id="@+id/edit_book_price"
+                    android:hint="@string/required_field"
+                    style="@style/EditorTextNumber" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- //////////////////////////////////// -->
+        <!-- supplier -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_supplier" />
+
+            <LinearLayout
+                style="@style/EditorValueHzLayout">
+
+                <EditText
+                    android:id="@+id/edit_book_supplier"
+                    android:hint="@string/required_field"
+                    style="@style/EditorTextNumber" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- //////////////////////////////////// -->
+        <!-- supplier phone -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_supplier_phone" />
+
+            <LinearLayout
+                style="@style/EditorValueVtLayout">
+
+                <EditText
+                    android:id="@+id/edit_book_supplier_phone"
+                    android:hint="@string/required_field"
+                    style="@style/EditorTextPhone" />
+
+                <LinearLayout
+                    style="@style/EditorButtonLayout">
+
+                    <Button
+                        android:id="@+id/btn_order"
+                        style="@style/EditorButton"
+                        android:text="@string/order" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- //////////////////////////////////// -->
+        <!-- quantity -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_quantity" />
+
+            <LinearLayout
+                style="@style/EditorValueVtLayout">
+
+                <EditText
+                    android:id="@+id/edit_book_quantity"
+                    android:hint="@string/required_field"
+                    style="@style/EditorTextNumber" />
+
+                <LinearLayout
+                    style="@style/EditorButtonLayout">
+
+                    <Button
+                        android:id="@+id/btn_add_quantity"
+                        android:text="@string/plus1"
+                        style="@style/EditorButton" />
+
+                    <Button
+                        android:id="@+id/btn_remove_quantity"
+                        android:text="@string/minus1"
+                        style="@style/EditorButton" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- //////////////////////////////////// -->
+        <!-- is audiobook available -->
+        <!-- //////////////////////////////////// -->
+        <LinearLayout
+            style="@style/EditorRowLayout" >
+
+            <TextView
+                style="@style/EditorLabel"
+                android:text="@string/label_audiobook" />
+
+            <LinearLayout
+                style="@style/EditorValueHzLayout">
+
+                <CheckBox
+                    android:id="@+id/chk_is_audiobook"
+                    style="@style/EditorCheckBox" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
